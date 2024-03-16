@@ -28,8 +28,18 @@ import UpdateUser from "./pages/UpdateUser";
 
 function App() {
   const user = useSelector((state) => state.user);
-  const [on, setOn] = useState(true);
+  const [on, setOn] = useState(() => {
+    // Retrieve the value of 'on' from localStorage if available, otherwise default to true
+    const storedValue = localStorage.getItem("on");
+    return storedValue !== null ? JSON.parse(storedValue) : true;
+  });
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Update localStorage whenever 'on' changes
+    localStorage.setItem("on", JSON.stringify(on));
+  }, [on]);
+
   useEffect(() => {
     const socket = io("http://localhost:8080");
     socket.off("notification").on("notification", (msgObj, user_id) => {
@@ -40,7 +50,7 @@ function App() {
     });
 
     socket.off("new-order").on("new-order", (msgObj) => {
-      if (user.isAdmin) {
+      if (user?.isAdmin) {
         dispatch(addNotification(msgObj));
       }
     });
@@ -68,10 +78,18 @@ function App() {
           zIndex: "999",
           top: "75px",
         }}
-        className=" position-absolute bg-secondary text-primary "
+        className=" position-absolute bg-light text-primary "
         onClick={() => setOn(!on)}
       >
-        {on ? "Off" : "On"}
+        {on ? (
+          <span>
+            <i className="fa-solid fa-volume-high"></i>
+          </span>
+        ) : (
+          <span>
+            <i className="fa-solid fa-volume-xmark"></i>
+          </span>
+        )}
       </button>
       <BrowserRouter>
         <Navigation on={on} handleClick={handleClick} />
