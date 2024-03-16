@@ -87,7 +87,7 @@ app.use("/uploads", express.static("uploads"));
 app.get("/videos", async (req, res) => {
   try {
     const sort = { _id: -1 };
-    const videos = await Story.find({}, { __v: 0 }).sort(sort);
+    const videos = await Story.find({verify:true}, { __v: 0 }).sort(sort);
 
     res.json({ videos });
   } catch (error) {
@@ -95,6 +95,20 @@ app.get("/videos", async (req, res) => {
       "Erreur lors de la récupération des vidéos depuis la base de données:",
       error
     );
+  }
+});
+
+app.get("/video", async (req, res) => {
+  try {
+    const videos = await Story.find({}, { __v: 0 });
+
+    res.json({ videos });
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des vidéos depuis la base de données:",
+      error
+    );
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
